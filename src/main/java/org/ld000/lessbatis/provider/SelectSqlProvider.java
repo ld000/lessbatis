@@ -118,7 +118,6 @@ public class SelectSqlProvider<T> {
         StringBuilder sql = new StringBuilder("SELECT ");
 
         // 根据不同查询类型添加不同的 SELECT 语句
-
         switch (selectType) {
             case NORMAL:
                 int i = 0;

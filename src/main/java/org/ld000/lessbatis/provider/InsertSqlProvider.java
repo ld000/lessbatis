@@ -30,7 +30,7 @@ public class InsertSqlProvider<T> {
      * @param para
      * @return
      */
-    public String batchInsert(Map<String, Object> para) {
+    public String insertMultiRow(Map<String, Object> para) {
         return genBatchInsertSql(para);
     }
 

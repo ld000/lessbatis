@@ -69,7 +69,7 @@ public class DaoTest {
         obj.setId(1L);
 //            obj.setName("df");
 
-        Obj a = mapper.querySingleTable(obj);
+        Obj a = mapper.queryOne(obj);
         System.out.println(a);
     }
 
@@ -79,7 +79,17 @@ public class DaoTest {
         obj.setId(1L);
 //            obj.setName("df");
 
-        Obj a = mapper.querySingleTable(obj, "name");
+        Obj a = mapper.queryOne(obj, "name");
+        System.out.println(a);
+    }
+
+    @Test
+    public void queryListTest() {
+        Obj obj = new Obj();
+//        obj.setId(1L);
+        obj.setName("df");
+
+        List<Obj> a = mapper.queryList(obj, "name");
         System.out.println(a);
     }
 
@@ -118,7 +128,7 @@ public class DaoTest {
         list.add(obj3);
         list.add(obj2);
 
-        int i = mapper.batchInsert(list);
+        int i = mapper.insertMultiRow(list);
 
         System.out.println(i);
     }
