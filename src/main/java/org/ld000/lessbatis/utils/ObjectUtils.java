@@ -1,4 +1,4 @@
-package org.ld000.lessbatis;
+package org.ld000.lessbatis.utils;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;

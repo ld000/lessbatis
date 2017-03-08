@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.ld000.lessbatis;
+package org.ld000.lessbatis.utils;
 
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.SoftReference;

@@ -1,8 +1,11 @@
 package org.ld000.lessbatis.provider;
 
-import org.ld000.lessbatis.ClassUtils;
-import org.ld000.lessbatis.ModelUtils;
-import org.ld000.lessbatis.StringUtils;
+import org.ld000.lessbatis.utils.*;
+
+import javax.persistence.Transient;
+import java.lang.reflect.Field;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author lidong 17-3-7.
@@ -33,7 +36,7 @@ public class InsertSqlProvider<T> {
      * 生成批量 insert sql 语句, 驼峰命名会转成下划线命名 </br>
      * DAO 方法参数需加 {@code @Param("list")} 注解
      *
-     * @param obj
+     * @param para
      * @return
      */
     public String batchInsertWithCamelhumpToUnderline(Map<String, Object> para) {
@@ -44,16 +47,16 @@ public class InsertSqlProvider<T> {
      * 生成批量 insert sql 语句 </br>
      * DAO 方法参数需加 {@code @Param("list")} 注解
      *
-     * @param obj
+     * @param para
      * @return
      */
     public String batchInsert(Map<String, Object> para) {
         return genBatchInsertSql(para, false);
     }
 
-	/* ************************************************
-	 * 内部方法
-	 * ************************************************ */
+    /* ************************************************
+     * 内部方法
+     * ************************************************ */
 
     /**
      * 生成单条 insert sql 语句
@@ -66,23 +69,37 @@ public class InsertSqlProvider<T> {
         @SuppressWarnings("unchecked")
         final Class<T> clazz = (Class<T>) ClassUtils.getOriginalClass(obj.getClass());
 
-        SQL sql = new SQL().INSERT_INTO(ModelUtils.getTableName(clazz));
+        StringBuilder sql = new StringBuilder("INSERT INTO ").append(ModelUtils.getTableName(clazz))
+                .append(" (%) VALUES (");
 
-        for (Field property : FieldUtils.getAllFields(clazz)) {
+//        SQL sql = new SQL().INSERT_INTO(ModelUtils.getTableName(clazz));
+
+        StringBuilder fieldList = new StringBuilder();
+
+        int i = 0;
+        for (Field property : ReflectionUtils.getDeclaredFields(clazz)) {
             if (property.isAnnotationPresent(Transient.class))
                 continue;
 
             final String propertyName = property.getName();
-            final Object inValue = Reflections.getFieldValue(obj, propertyName);
+            final Object inValue = ReflectionUtils.readProperty(obj, propertyName);
 
             if (ObjectUtils.isEmpty(inValue))
-                continue;	// 只添加非空字段
+                continue;   // 只添加非空字段
 
-            sql.VALUES("`" + (camelhumpToUnderline ? StringUtils.toUnderScoreCase(propertyName).toUpperCase()
-                    : propertyName.toUpperCase()) + "`", "#{" + propertyName + "}");
+            String fieldName = camelhumpToUnderline ? StringUtils.toUnderScoreCase(propertyName) : propertyName;
+
+            if (i++ > 0) {
+                sql.append(", ");
+                fieldList.append(", ");
+            }
+
+            fieldList.append(fieldName);
+            sql.append("#{").append(propertyName).append("}");
         }
+        sql.append(")");
 
-        return sql.toString();
+        return sql.toString().replace("%", fieldList);
     }
 
     /**
@@ -106,8 +123,8 @@ public class InsertSqlProvider<T> {
         final Object firstObj = list.get(0);
         final Class<T> clazz = ClassUtils.getOriginalClass((Class<T>) firstObj.getClass());
 
-        StringBuilder sql = new StringBuilder("INSERT INTO ").append(ModelUtils.getTableName(clazz)).append(" (id, ");
-        StringBuilder valueSql = new StringBuilder("#{list[0].id}, ");
+        StringBuilder sql = new StringBuilder("INSERT INTO ").append(ModelUtils.getTableName(clazz)).append(" ( ");
+        StringBuilder valueSql = new StringBuilder(" ");
 
         int i = 0;
         for (Field property : clazz.getDeclaredFields()) {
@@ -115,18 +132,18 @@ public class InsertSqlProvider<T> {
                 continue;
 
             final String propertyName = property.getName();
-            final Object inValue = Reflections.getFieldValue(firstObj, propertyName);
+            final Object inValue = ReflectionUtils.readProperty(firstObj, propertyName);
 
             if (ObjectUtils.isEmpty(inValue))
-                continue;	// 只添加非空字段
+                continue;    // 只添加非空字段
 
             if (i++ > 0) {
                 sql.append(", ");
                 valueSql.append(", ");
             }
 
-            sql.append("`" + (camelhumpToUnderline ? StringUtils.toUnderScoreCase(propertyName).toUpperCase() :
-                    propertyName.toUpperCase()) + "`");
+            sql.append("`").append(camelhumpToUnderline ? StringUtils.toUnderScoreCase(propertyName) :
+                    propertyName).append("`");
 
             valueSql.append("#{list[?].").append(propertyName).append("}");
         }

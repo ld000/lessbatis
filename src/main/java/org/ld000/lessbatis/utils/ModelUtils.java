@@ -1,4 +1,4 @@
-package org.ld000.lessbatis;
+package org.ld000.lessbatis.utils;
 
 import javax.persistence.Table;
 
@@ -22,10 +22,10 @@ public class ModelUtils {
             Table table = clazz.getAnnotation(Table.class);
 
             if (!StringUtils.isBlank(table.name()))
-                return table.name().toUpperCase();
+                return table.name();
         }
 
-        return clazz.getSimpleName().toUpperCase();
+        return clazz.getSimpleName();
     }
 
 }

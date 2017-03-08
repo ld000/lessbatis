@@ -1,10 +1,6 @@
 package org.ld000.lessbatis.provider;
 
-import org.apache.ibatis.jdbc.SQL;
-import org.ld000.lessbatis.ClassUtils;
-import org.ld000.lessbatis.ModelUtils;
-import org.ld000.lessbatis.ObjectUtils;
-import org.ld000.lessbatis.StringUtils;
+import org.ld000.lessbatis.utils.*;
 
 import javax.persistence.Transient;
 import java.lang.reflect.Field;
@@ -125,42 +121,59 @@ public class SelectSqlProvider<T> {
         @SuppressWarnings("unchecked")
         final Class<T> clazz = (Class<T>) ClassUtils.getOriginalClass(condition.getClass());
 
-        SQL sql = new SQL().FROM(ModelUtils.getTableName(clazz));
+        StringBuilder sql = new StringBuilder("SELECT ");
+
+//        SQL sql = new SQL().FROM(ModelUtils.getTableName(clazz));
 
         // 根据不同查询类型添加不同的 SELECT 语句
         if (count) {
-            sql.SELECT("COUNT(1)");
+            sql.append("COUNT(1)");
         } else if (checkExist) {
-            sql.SELECT("1");
+            sql.append("1");
         } else {
-            for (Field property : clazz.getDeclaredFields()) {
+            int i = 0;
+            for (Field property : ReflectionUtils.getDeclaredFields(clazz)) {
                 if (property.isAnnotationPresent(Transient.class)) {
                     continue;
                 }
 
+                if (i++ != 0) {
+                    sql.append(", ");
+                }
+
                 final String propertyName = property.getName();
 
-                sql.SELECT("`" + (camelhumpToUnderline ? StringUtils.toUnderScoreCase(propertyName).toUpperCase() :
-                        propertyName.toUpperCase()) + "` AS \"" + propertyName + "\"");
+                sql.append("`").append(camelhumpToUnderline ? StringUtils.toUnderScoreCase(propertyName) : propertyName)
+                        .append("` AS \"").append(propertyName).append("\"");
             }
         }
 
+        sql.append(" FROM ").append(ModelUtils.getTableName(clazz));
+
         // 添加 WHERE 条件
-        for (Field property : FieldUtils.getAllFields(clazz)) {
+        if (ReflectionUtils.getDeclaredFields(clazz).length > 0) {
+            sql.append(" WHERE ");
+        }
+        int i = 0;
+        for (Field property : ReflectionUtils.getDeclaredFields(clazz)) {
             if (property.isAnnotationPresent(Transient.class)) {
                 continue;
             }
 
             final String propertyName = property.getName();
-            final Object inValue = Reflections.getFieldValue(condition, propertyName);
+            final Object inValue = ReflectionUtils.readProperty(condition, propertyName);
 
             // 只添加非空的字段
             if (ObjectUtils.isEmpty(inValue)) {
                 continue;
             }
 
-            sql.WHERE("`" + (camelhumpToUnderline ? StringUtils.toUnderScoreCase(propertyName).toUpperCase() :
-                    propertyName.toUpperCase()) + "` = #{" + propertyName + "}");
+            if (i++ != 0) {
+                sql.append(" AND ");
+            }
+
+            sql.append("`").append(camelhumpToUnderline ? StringUtils.toUnderScoreCase(propertyName) :
+                    propertyName).append("` = #{").append(propertyName).append("}");
         }
 
         if (checkExist)
