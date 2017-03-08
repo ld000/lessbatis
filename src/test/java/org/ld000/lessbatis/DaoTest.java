@@ -124,5 +124,16 @@ public class DaoTest {
         System.out.println(i);
     }
 
+    @Test
+    public void deleteTest() {
+        Obj obj = new Obj();
+        obj.setId(875L);
+//        obj.setName("df");
+//        obj.setUserName("dfd");
+
+        int i = mapper.delete(obj);
+        System.out.println(i);
+    }
+
 
 }

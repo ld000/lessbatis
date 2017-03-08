@@ -1,8 +1,10 @@
 package org.ld000.lessbatis;
 
+import org.apache.ibatis.annotations.DeleteProvider;
 import org.apache.ibatis.annotations.InsertProvider;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.SelectProvider;
+import org.ld000.lessbatis.provider.DeleteSqlProvider;
 import org.ld000.lessbatis.provider.InsertSqlProvider;
 import org.ld000.lessbatis.provider.SelectSqlProvider;
 
@@ -46,5 +48,8 @@ public interface LessBatisMapper<T> {
     /* ************************************************
      * Delete method
      * ************************************************ */
+
+    @DeleteProvider(type = DeleteSqlProvider.class, method = "delete")
+    Integer delete(T condition);
 
 }

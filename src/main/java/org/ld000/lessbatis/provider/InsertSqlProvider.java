@@ -25,8 +25,7 @@ public class InsertSqlProvider<T> {
     }
 
     /**
-     * 生成批量 insert sql 语句 </br>
-     * DAO 方法参数需加 {@code @Param("list")} 注解
+     * 生成批量 insert sql 语句
      *
      * @param para
      * @return
@@ -36,7 +35,7 @@ public class InsertSqlProvider<T> {
     }
 
     /* ************************************************
-     * 内部方法
+     * private method
      * ************************************************ */
 
     /**
@@ -52,8 +51,6 @@ public class InsertSqlProvider<T> {
 
         StringBuilder sql = new StringBuilder("INSERT INTO ").append(ModelUtils.getTableName(clazz))
                 .append(" (%) VALUES (");
-
-//        SQL sql = new SQL().INSERT_INTO(ModelUtils.getTableName(clazz));
 
         StringBuilder fieldList = new StringBuilder();
 
@@ -140,8 +137,6 @@ public class InsertSqlProvider<T> {
             sql.append(vSql);
             sql.append(")");
         }
-
-        System.out.println(sql.toString());
 
         return sql.toString();
     }
