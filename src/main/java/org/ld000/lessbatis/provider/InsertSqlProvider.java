@@ -1,7 +1,9 @@
 package org.ld000.lessbatis.provider;
 
+import org.ld000.lessbatis.annotation.CamelHumpToUnderline;
 import org.ld000.lessbatis.utils.*;
 
+import javax.persistence.GeneratedValue;
 import javax.persistence.Transient;
 import java.lang.reflect.Field;
 import java.util.List;
@@ -13,34 +15,13 @@ import java.util.Map;
 public class InsertSqlProvider<T> {
 
     /**
-     * 生成单条 insert sql 语句, 驼峰命名会转成下划线命名
-     *
-     * @param obj
-     * @return
-     */
-    public String insertWithCamelhumpToUnderline(T obj) {
-        return genInsertSql(obj, true);
-    }
-
-    /**
      * 生成单条 insert sql 语句
      *
      * @param obj
      * @return
      */
     public String insert(T obj) {
-        return genInsertSql(obj, false);
-    }
-
-    /**
-     * 生成批量 insert sql 语句, 驼峰命名会转成下划线命名 </br>
-     * DAO 方法参数需加 {@code @Param("list")} 注解
-     *
-     * @param para
-     * @return
-     */
-    public String batchInsertWithCamelhumpToUnderline(Map<String, Object> para) {
-        return genBatchInsertSql(para, true);
+        return genInsertSql(obj, obj.getClass().isAnnotationPresent(CamelHumpToUnderline.class));
     }
 
     /**
@@ -51,7 +32,7 @@ public class InsertSqlProvider<T> {
      * @return
      */
     public String batchInsert(Map<String, Object> para) {
-        return genBatchInsertSql(para, false);
+        return genBatchInsertSql(para);
     }
 
     /* ************************************************
@@ -78,7 +59,7 @@ public class InsertSqlProvider<T> {
 
         int i = 0;
         for (Field property : ReflectionUtils.getDeclaredFields(clazz)) {
-            if (property.isAnnotationPresent(Transient.class))
+            if (property.isAnnotationPresent(Transient.class) || property.isAnnotationPresent(GeneratedValue.class))
                 continue;
 
             final String propertyName = property.getName();
@@ -106,11 +87,10 @@ public class InsertSqlProvider<T> {
      * 生成批量 insert 语句
      *
      * @param para
-     * @param camelhumpToUnderline 是否驼峰命名转下划线命名
      * @return
      */
     @SuppressWarnings("unchecked")
-    private String genBatchInsertSql(final Map<String, Object> para, final boolean camelhumpToUnderline) {
+    private String genBatchInsertSql(final Map<String, Object> para) {
         if (para.get("list") == null)
             return "SELECT 1 FROM dual";
 
@@ -122,13 +102,14 @@ public class InsertSqlProvider<T> {
 
         final Object firstObj = list.get(0);
         final Class<T> clazz = ClassUtils.getOriginalClass((Class<T>) firstObj.getClass());
+        Boolean camelHumpToUnderline = firstObj.getClass().isAnnotationPresent(CamelHumpToUnderline.class);
 
-        StringBuilder sql = new StringBuilder("INSERT INTO ").append(ModelUtils.getTableName(clazz)).append(" ( ");
-        StringBuilder valueSql = new StringBuilder(" ");
+        StringBuilder sql = new StringBuilder("INSERT INTO ").append(ModelUtils.getTableName(clazz)).append(" (");
+        StringBuilder valueSql = new StringBuilder();
 
         int i = 0;
         for (Field property : clazz.getDeclaredFields()) {
-            if (property.isAnnotationPresent(Transient.class))
+            if (property.isAnnotationPresent(Transient.class) || property.isAnnotationPresent(GeneratedValue.class))
                 continue;
 
             final String propertyName = property.getName();
@@ -142,7 +123,7 @@ public class InsertSqlProvider<T> {
                 valueSql.append(", ");
             }
 
-            sql.append("`").append(camelhumpToUnderline ? StringUtils.toUnderScoreCase(propertyName) :
+            sql.append("`").append(camelHumpToUnderline ? StringUtils.toUnderScoreCase(propertyName) :
                     propertyName).append("`");
 
             valueSql.append("#{list[?].").append(propertyName).append("}");
@@ -159,6 +140,8 @@ public class InsertSqlProvider<T> {
             sql.append(vSql);
             sql.append(")");
         }
+
+        System.out.println(sql.toString());
 
         return sql.toString();
     }

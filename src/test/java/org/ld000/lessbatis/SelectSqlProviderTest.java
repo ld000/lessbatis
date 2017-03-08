@@ -29,16 +29,4 @@ public class SelectSqlProviderTest {
         System.out.println(sql);
     }
 
-    @Test
-    public void test2() {
-        Obj obj = new Obj();
-        obj.setId(123L);
-        obj.setName("df");
-        obj.setUserName("dfd");
-
-        String sql = selectSqlProvider.querySingleTable(obj);
-
-        System.out.println(sql);
-    }
-
 }

@@ -11,6 +11,8 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author lidong9144@163.com 17-3-8.
@@ -38,6 +40,7 @@ public class DaoTest {
 
     @After
     public void after() {
+        session.commit();
         session.close();
     }
 
@@ -69,6 +72,56 @@ public class DaoTest {
 
         Obj a = mapper.querySingleTable(obj);
         System.out.println(a);
+    }
+
+    @Test
+    public void querySingleTableFieldTest() {
+        Obj obj = new Obj();
+        obj.setId(1L);
+//            obj.setName("df");
+
+        Obj a = mapper.querySingleTableSpecifyFields(obj, new String[] {"name"});
+        System.out.println(a);
+    }
+
+    @Test
+    public void insertTest() {
+        Obj obj = new Obj();
+        obj.setId(123L);
+        obj.setName("df");
+        obj.setUserName("dfd");
+
+        int i = mapper.insert(obj);
+
+        System.out.println(i);
+    }
+
+    @Test
+    public void batchInsertTest() {
+        List<Obj> list = new ArrayList<>();
+
+        Obj obj = new Obj();
+        obj.setId(123L);
+        obj.setName("df");
+        obj.setUserName("dfd");
+
+        Obj obj2 = new Obj();
+        obj2.setId(156L);
+        obj2.setName("dfxx");
+        obj2.setUserName("dfcd");
+
+        Obj obj3 = new Obj();
+        obj3.setId(861L);
+        obj3.setName("dfdf");
+        obj3.setUserName("dfetrd");
+
+        list.add(obj);
+        list.add(obj3);
+        list.add(obj2);
+
+        int i = mapper.batchInsert(list);
+
+        System.out.println(i);
     }
 
 

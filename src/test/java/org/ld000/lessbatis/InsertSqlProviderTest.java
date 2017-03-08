@@ -21,7 +21,7 @@ public class InsertSqlProviderTest {
         obj.setId(123L);
         obj.setName("df");
         obj.setUserName("dfd");
-        String sql = insertSqlProvider.insertWithCamelhumpToUnderline(obj);
+        String sql = insertSqlProvider.insert(obj);
 
         System.out.println(sql);
     }
@@ -36,14 +36,14 @@ public class InsertSqlProviderTest {
         obj.setUserName("dfd");
 
         Obj obj2 = new Obj();
-        obj.setId(156L);
-        obj.setName("df");
-        obj.setUserName("dfd");
+        obj2.setId(156L);
+        obj2.setName("dfxx");
+        obj2.setUserName("dfcd");
 
         Obj obj3 = new Obj();
-        obj.setId(861L);
-        obj.setName("df");
-        obj.setUserName("dfd");
+        obj3.setId(861L);
+        obj3.setName("dfdf");
+        obj3.setUserName("dfetrd");
 
         list.add(obj);
         list.add(obj3);
