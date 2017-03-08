@@ -36,7 +36,7 @@ public class SelectSqlProviderTest {
         obj.setName("df");
         obj.setUserName("dfd");
 
-        String sql = selectSqlProvider.querySingleTableWithCamelhumpToUnderline(obj);
+        String sql = selectSqlProvider.querySingleTable(obj);
 
         System.out.println(sql);
     }

@@ -4,6 +4,9 @@ import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -14,26 +17,59 @@ import java.io.InputStream;
  */
 public class DaoTest {
 
-    @Test
-    public void test() throws IOException {
+    private static SqlSessionFactory sqlSessionFactory;
+    private SqlSession session;
+    private TestMapper mapper;
+
+    @BeforeClass
+    public static void beforeClass() throws IOException {
         String resource = "mybatis-config.xml";
         InputStream inputStream = Resources.getResourceAsStream(resource);
-        SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(inputStream);
+        sqlSessionFactory = new SqlSessionFactoryBuilder().build(inputStream);
         sqlSessionFactory.getConfiguration().addMapper(TestMapper.class);
 
-        SqlSession session = sqlSessionFactory.openSession();
-        try {
-            TestMapper mapper = session.getMapper(TestMapper.class);
-
-            Obj obj = new Obj();
-            obj.setId(123L);
-            obj.setName("df");
-
-            int a = mapper.selectCount(obj);
-            System.out.println(a);
-        } finally {
-            session.close();
-        }
     }
+
+    @Before
+    public void before() {
+        session = sqlSessionFactory.openSession();
+        mapper = session.getMapper(TestMapper.class);
+    }
+
+    @After
+    public void after() {
+        session.close();
+    }
+
+    @Test
+    public void queryCountTest() throws IOException {
+        Obj obj = new Obj();
+        obj.setId(1L);
+//            obj.setName("df");
+
+        Integer a = mapper.queryCount(obj);
+        System.out.println(a);
+    }
+
+    @Test
+    public void checkExistTest() {
+        Obj obj = new Obj();
+        obj.setId(2L);
+//            obj.setName("df");
+
+        Integer a = mapper.checkExist(obj);
+        System.out.println(a);
+    }
+
+    @Test
+    public void querySingleTableTest() {
+        Obj obj = new Obj();
+        obj.setId(1L);
+//            obj.setName("df");
+
+        Obj a = mapper.querySingleTable(obj);
+        System.out.println(a);
+    }
+
 
 }

@@ -1,5 +1,6 @@
 package org.ld000.lessbatis.provider;
 
+import org.ld000.lessbatis.annotation.CamelHumpToUnderline;
 import org.ld000.lessbatis.utils.*;
 
 import javax.persistence.Transient;
@@ -11,63 +12,33 @@ import java.lang.reflect.Field;
 public class SelectSqlProvider<T> {
 
     /**
-     * 生成单条 select sql 语句, 只查询当前类包含的字段，不查询父类字段, 驼峰命名会转成下划线命名
-     *
-     * @param condition
-     * @return
-     */
-    public String querySingleTableWithCamelhumpToUnderline(T condition) {
-        return genQuerySql(condition, true);
-    }
-
-    /**
      * 生成单条 select sql 语句, 只查询当前类包含的字段，不查询父类字段
      *
-     * @param condition
-     * @return
+     * @param condition query condition
+     * @return sql
      */
     public String querySingleTable(T condition) {
-        return genQuerySql(condition, false);
-    }
-
-    /**
-     * 生成单表统计指定条件数据数量 sql, 驼峰命名会转成下划线命名
-     *
-     * @param condition
-     * @return
-     */
-    public String countSingleTableWithCamelhumpToUnderline(T condition) {
-        return genCountSql(condition, true);
+        return genQuerySql(condition, condition.getClass().isAnnotationPresent(CamelHumpToUnderline.class));
     }
 
     /**
      * 生成单表统计指定条件数据数量 sql
      *
-     * @param condition
-     * @return
+     * @param condition query condition
+     * @return sql
      */
     public String countSingleTable(T condition) {
-        return genCountSql(condition, false);
+        return genCountSql(condition, condition.getClass().isAnnotationPresent(CamelHumpToUnderline.class));
     }
 
     /**
      * 生成单表查询指定条件数据是否存在 sql
      *
-     * @param condition
-     * @return
+     * @param condition query condition
+     * @return sql
      */
     public String checkExist(T condition) {
-        return genCheckExistSql(condition, false);
-    }
-
-    /**
-     * 生成单表查询指定条件数据是否存在 sql, 驼峰命名会转成下划线命名
-     *
-     * @param condition
-     * @return
-     */
-    public String checkExistWithCamelhumpToUnderline(T condition) {
-        return genCheckExistSql(condition, true);
+        return genCheckExistSql(condition, condition.getClass().isAnnotationPresent(CamelHumpToUnderline.class));
     }
 
     /* ************************************************
@@ -78,33 +49,33 @@ public class SelectSqlProvider<T> {
      * 生成单表 select sql 语句
      *
      * @param condition 查询条件
-     * @param camelhumpToUnderline 是否驼峰命名转下划线命名
-     * @return
+     * @param camelHumpToUnderline 是否驼峰命名转下划线命名
+     * @return sql
      */
-    private String genQuerySql(final T condition, final boolean camelhumpToUnderline) {
-        return genQuerySingleTableSql(condition, false, false, camelhumpToUnderline);
+    private String genQuerySql(final T condition, final boolean camelHumpToUnderline) {
+        return genQuerySingleTableSql(condition, false, false, camelHumpToUnderline);
     }
 
     /**
      * 生成单表统计指定条件数据数量 sql 语句
      *
      * @param condition 查询条件
-     * @param camelhumpToUnderline 是否驼峰命名转下划线命名
-     * @return
+     * @param camelHumpToUnderline 是否驼峰命名转下划线命名
+     * @return sql
      */
-    private String genCountSql(final T condition, final boolean camelhumpToUnderline) {
-        return genQuerySingleTableSql(condition, true, false, camelhumpToUnderline);
+    private String genCountSql(final T condition, final boolean camelHumpToUnderline) {
+        return genQuerySingleTableSql(condition, true, false, camelHumpToUnderline);
     }
 
     /**
      * 生成单表查询指定条件数据是否存在 sql 语句
      *
      * @param condition 查询条件
-     * @param camelhumpToUnderline 是否驼峰命名转下划线命名
-     * @return
+     * @param camelHumpToUnderline 是否驼峰命名转下划线命名
+     * @return sql
      */
-    private String genCheckExistSql(final T condition, final boolean camelhumpToUnderline) {
-        return genQuerySingleTableSql(condition, false, true, camelhumpToUnderline);
+    private String genCheckExistSql(final T condition, final boolean camelHumpToUnderline) {
+        return genQuerySingleTableSql(condition, false, true, camelHumpToUnderline);
     }
 
     /**
@@ -113,21 +84,19 @@ public class SelectSqlProvider<T> {
      * @param condition 查询条件
      * @param count 是否 count sql
      * @param checkExist 是否 checkExist sql
-     * @param camelhumpToUnderline 是否驼峰命名转下划线命名
-     * @return
+     * @param camelHumpToUnderline 是否驼峰命名转下划线命名
+     * @return sql
      */
     private String genQuerySingleTableSql(final T condition,
-                                          final boolean count, final boolean checkExist, final boolean camelhumpToUnderline) {
+                                          final boolean count, final boolean checkExist, final boolean camelHumpToUnderline) {
         @SuppressWarnings("unchecked")
         final Class<T> clazz = (Class<T>) ClassUtils.getOriginalClass(condition.getClass());
 
         StringBuilder sql = new StringBuilder("SELECT ");
 
-//        SQL sql = new SQL().FROM(ModelUtils.getTableName(clazz));
-
         // 根据不同查询类型添加不同的 SELECT 语句
         if (count) {
-            sql.append("COUNT(1)");
+            sql.append("COUNT(*)");
         } else if (checkExist) {
             sql.append("1");
         } else {
@@ -143,7 +112,7 @@ public class SelectSqlProvider<T> {
 
                 final String propertyName = property.getName();
 
-                sql.append("`").append(camelhumpToUnderline ? StringUtils.toUnderScoreCase(propertyName) : propertyName)
+                sql.append("`").append(camelHumpToUnderline ? StringUtils.toUnderScoreCase(propertyName) : propertyName)
                         .append("` AS \"").append(propertyName).append("\"");
             }
         }
@@ -172,7 +141,7 @@ public class SelectSqlProvider<T> {
                 sql.append(" AND ");
             }
 
-            sql.append("`").append(camelhumpToUnderline ? StringUtils.toUnderScoreCase(propertyName) :
+            sql.append("`").append(camelHumpToUnderline ? StringUtils.toUnderScoreCase(propertyName) :
                     propertyName).append("` = #{").append(propertyName).append("}");
         }
 
