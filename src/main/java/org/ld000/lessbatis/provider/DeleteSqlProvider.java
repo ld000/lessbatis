@@ -1,6 +1,5 @@
 package org.ld000.lessbatis.provider;
 
-import org.ld000.lessbatis.SelectType;
 import org.ld000.lessbatis.annotation.CamelHumpToUnderline;
 import org.ld000.lessbatis.utils.*;
 

@@ -29,7 +29,6 @@ public class DaoTest {
         InputStream inputStream = Resources.getResourceAsStream(resource);
         sqlSessionFactory = new SqlSessionFactoryBuilder().build(inputStream);
         sqlSessionFactory.getConfiguration().addMapper(TestMapper.class);
-
     }
 
     @Before
@@ -80,7 +79,7 @@ public class DaoTest {
         obj.setId(1L);
 //            obj.setName("df");
 
-        Obj a = mapper.querySingleTableSpecifyFields(obj, new String[] {"name"});
+        Obj a = mapper.querySingleTable(obj, "name");
         System.out.println(a);
     }
 

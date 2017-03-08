@@ -16,22 +16,22 @@ public class SelectSqlProvider<T> {
     /**
      * 生成单条 select sql 语句, 只查询当前类包含的字段，不查询父类字段
      *
-     * @param condition query condition
+     * @param para query condition
      * @return sql
      */
-    public String querySingleTable(T condition) {
-        return genQuerySql(condition, condition.getClass().isAnnotationPresent(CamelHumpToUnderline.class));
-    }
-
-    public String querySingleTableSpecifyFields(final Map<String, Object> para) {
+    public String querySingleTable(final Map<String, Object> para) {
         @SuppressWarnings("unchecked")
         T condition = (T) para.get("condition");
-        String[] fields = (String[]) para.get("fields");
 
-        return genQuerySingleTableSql(condition,
+        String[] fields = (String[]) para.get("fields");
+        if (fields.length != 0) {
+            return genQuerySingleTableSql(condition,
                 fields,
                 SelectType.SPECIFY_FIELDS,
                 condition.getClass().isAnnotationPresent(CamelHumpToUnderline.class));
+        }
+
+        return genQuerySql(condition, condition.getClass().isAnnotationPresent(CamelHumpToUnderline.class));
     }
 
     /**
@@ -183,11 +183,7 @@ public class SelectSqlProvider<T> {
             sql.append("`").append(camelHumpToUnderline ? StringUtils.toUnderScoreCase(propertyName) :
                     propertyName).append("` = ");
 
-            if (selectType.equals(SelectType.SPECIFY_FIELDS)) {
-                sql.append("#{condition.").append(propertyName).append("}");
-            } else {
-                sql.append("#{").append(propertyName).append("}");
-            }
+            sql.append("#{condition.").append(propertyName).append("}");
         }
 
         if (selectType.equals(SelectType.CHECK_EXIST))

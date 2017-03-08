@@ -20,10 +20,7 @@ public interface LessBatisMapper<T> {
      * ************************************************ */
 
     @SelectProvider(type = SelectSqlProvider.class, method = "querySingleTable")
-    T querySingleTable(T condition);
-
-    @SelectProvider(type = SelectSqlProvider.class, method = "querySingleTableSpecifyFields")
-    T querySingleTableSpecifyFields(@Param("condition") T condition, @Param("fields") String[] fields);
+    T querySingleTable(@Param("condition") T condition, @Param("fields") String... fields);
 
     @SelectProvider(type = SelectSqlProvider.class, method = "countSingleTable")
     Integer queryCount(T condition);

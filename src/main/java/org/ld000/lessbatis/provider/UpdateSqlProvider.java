@@ -5,6 +5,14 @@ package org.ld000.lessbatis.provider;
  */
 public class UpdateSqlProvider<T> {
 
+    /* ************************************************
+     * private method
+     * ************************************************ */
 
+    private String gemUpdateSql() {
+        StringBuilder sql = new StringBuilder("UPDATE ");
+
+        return sql.toString();
+    }
 
 }
